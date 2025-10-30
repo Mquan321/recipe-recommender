@@ -89,7 +89,7 @@ st.markdown("""
 # === HEADER ===
 st.markdown("""
 <div class="main-header">
-    <h1>Cooking NHÓM 8 - Recipe Recommender System</h1>
+    <h1>NHÓM 8 - Recipe Recommender System</h1>
 </div>
 """, unsafe_allow_html=True)
 
@@ -211,4 +211,5 @@ st.markdown("""
 </div>
 
 """, unsafe_allow_html=True)
+
 
