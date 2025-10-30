@@ -206,11 +206,12 @@ with tab2:
 # === FOOTER ===
 st.markdown("""
 <div class='footer'>
-    <p><strong>NHÓM 10</strong> | Recipe Recommender System | Project 2025</p>
+    <p><strong>NHÓM 8</strong> | Recipe Recommender System | Project 2025</p>
     <p><em>Đề xuất món ăn cá nhân hóa từ 872K đánh giá</em></p>
 </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
