@@ -5,7 +5,7 @@ import pickle
 # === CẤU HÌNH TRANG ===
 st.set_page_config(
     page_title="NHÓM 8 - Recipe Recommender",
-    page_icon="Cooking",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -211,3 +211,4 @@ st.markdown("""
 </div>
 
 """, unsafe_allow_html=True)
+
