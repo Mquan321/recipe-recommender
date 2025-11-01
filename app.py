@@ -563,23 +563,53 @@ with tab2:
             <div style='background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08)); 
                         padding: 1.25rem; border-radius: 12px; border-left: 4px solid var(--accent-1);'>
                 <h4 style='margin: 0 0 1rem 0; color: var(--accent-contrast); font-size: 1.1rem; font-weight: 700;'>Regression Metrics</h4>
+                <div style='display: grid; gap: 0.75rem;'>
             """, unsafe_allow_html=True)
-            st.metric("RMSE", rmse)
-            st.metric("R²", r2)
-            st.markdown("</div>", unsafe_allow_html=True)
+            
+            st.markdown(f"""
+                <div class='stat' style='margin: 0;'>
+                    <div class='label'>RMSE</div>
+                    <div class='value'>{rmse}</div>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown(f"""
+                <div class='stat' style='margin: 0;'>
+                    <div class='label'>R²</div>
+                    <div class='value'>{r2}</div>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("</div></div>", unsafe_allow_html=True)
         
         with colm2:
             st.markdown("""
             <div style='background: linear-gradient(135deg, rgba(255,107,107,0.08), rgba(255,142,83,0.08)); 
                         padding: 1.25rem; border-radius: 12px; border-left: 4px solid var(--accent-2);'>
                 <h4 style='margin: 0 0 1rem 0; color: var(--accent-contrast); font-size: 1.1rem; font-weight: 700;'>Ranking Metrics @ K=20</h4>
+                <div style='display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;'>
             """, unsafe_allow_html=True)
-            colx1, colx2, colx3, colx4 = st.columns(4)
-            colx1.metric("P@20", p20)
-            colx2.metric("R@20", r20)
-            colx3.metric("nDCG@20", ndcg20)
-            colx4.metric("mAP@20", map20)
-            st.markdown("</div>", unsafe_allow_html=True)
+            
+            st.markdown(f"""
+                <div class='stat' style='margin: 0;'>
+                    <div class='label'>P@20</div>
+                    <div class='value'>{p20}</div>
+                </div>
+                <div class='stat' style='margin: 0;'>
+                    <div class='label'>R@20</div>
+                    <div class='value'>{r20}</div>
+                </div>
+                <div class='stat' style='margin: 0;'>
+                    <div class='label'>nDCG@20</div>
+                    <div class='value'>{ndcg20}</div>
+                </div>
+                <div class='stat' style='margin: 0;'>
+                    <div class='label'>mAP@20</div>
+                    <div class='value'>{map20}</div>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("</div></div>", unsafe_allow_html=True)
         
         st.markdown("</div>", unsafe_allow_html=True)
 
