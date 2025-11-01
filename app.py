@@ -555,8 +555,6 @@ with tab2:
             rmse, r2 = "0.9467", "0.0878"
             p20, r20, ndcg20, map20 = "0.0020", "0.0400", "0.0141", "0.0067"
 
-        st.markdown("<div class='card' style='padding: 1.75rem;'>", unsafe_allow_html=True)
-        
         colm1, colm2 = st.columns([1, 2])
         with colm1:
             st.markdown("""
@@ -610,8 +608,6 @@ with tab2:
             """, unsafe_allow_html=True)
             
             st.markdown("</div></div>", unsafe_allow_html=True)
-        
-        st.markdown("</div>", unsafe_allow_html=True)
 
         st.markdown("""
         <div class="section-header" style="margin-top: 2rem;">
