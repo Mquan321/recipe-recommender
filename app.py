@@ -1,4 +1,3 @@
-# app.py
 import streamlit as st
 import pickle
 import base64
@@ -11,7 +10,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ---------- Helpers ----------
+# --- helper ---
 def get_base64_image(image_path):
     with open(image_path, "rb") as img_file:
         return base64.b64encode(img_file.read()).decode()
@@ -20,233 +19,416 @@ ASSETS = Path("assets")
 bg_path = ASSETS / "bg_food.jpg"
 bg_img = get_base64_image(bg_path) if bg_path.exists() else None
 
-# ---------- CSS: full redesign for cards, tab headers, image grid ----------
+# --- CSS: Professional, accessible, cards as layers, tab styling + image optimization ---
 st.markdown(f"""
 <style>
-:root {{
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root{{
   --card-bg: rgba(255,255,255,0.98);
-  --card-border: rgba(20,20,20,0.06);
+  --card-border: rgba(0,0,0,0.08);
   --accent-1: #FF6B6B;
   --accent-2: #FF8E53;
-  --accent-contrast: #222;
-  --muted: #6b7280;
-  --glass-blur: 6px;
-  --card-radius: 14px;
-  --shadow: 0 10px 30px rgba(10,10,10,0.06);
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --accent-contrast: #1a1a1a;
+  --muted: #4a5568;
+  --muted-light: #718096;
+  --glass-blur: 8px;
+  --card-radius: 16px;
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.18);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }}
 
-body, .stApp {{
-    font-family: var(--font-sans);
+* {{
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }}
 
-/* Background + overlay for contrast */
+/* Background with improved contrast */
 .stApp {{
     {f'background-image: url("data:image/jpg;base64,{bg_img}");' if bg_img else ''}
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
 }}
+
 .app-overlay {{
-    position: fixed; inset: 0;
-    background: rgba(250,250,250,0.70); /* light dim to ensure readability across themes */
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(245,247,250,0.8) 100%);
     z-index: 0;
     pointer-events: none;
-}
-
-/* header card */
-.main-header {{
-    margin-bottom: 1rem;
-    border-radius: 16px;
-    padding: 1.1rem;
-    background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
-    color: white;
-    box-shadow: var(--shadow);
-    z-index: 3;
-    position: relative;
 }}
-.main-header h1 {{ margin:0; font-size:1.95rem; font-weight:700; }}
-.main-header p {{ margin:6px 0 0; opacity:0.95; }}
 
-/* Generic card wrapper used everywhere */
-.card {{
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
+/* Main container */
+.reportview-container .main {{
+    padding: 2rem 1.5rem;
+    position: relative;
+    z-index: 1;
+}}
+
+/* Header card - Professional gradient */
+.main-header {{
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    padding: 2rem 1.5rem;
     border-radius: var(--card-radius);
-    padding: 0.9rem;
+    text-align: center;
     box-shadow: var(--shadow);
-    margin-bottom: 1rem;
+    color: white;
+    z-index: 2;
+    position: relative;
+    margin-bottom: 1.75rem;
+    border: 1px solid rgba(255,255,255,0.2);
+}}
+.main-header h1 {{
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -1.2px;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}}
+.main-header .subtitle {{
+    font-size: 1.05rem;
+    margin-top: 0.5rem;
+    color: rgba(255,255,255,0.95);
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}}
+
+/* TABS STYLING - Professional card-based tabs */
+.stTabs {{
+    background: var(--card-bg);
+    border-radius: var(--card-radius);
+    padding: 0.5rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--card-border);
     position: relative;
     z-index: 2;
+    margin-bottom: 1.5rem;
 }}
 
-/* Tabs container: style tab headers and active state */
-div[role="tablist"] {{
-    display:flex;
-    gap:0.6rem;
-    padding: 0.4rem;
-    background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(250,250,250,0.94));
-    border-radius: 12px;
-    border: 1px solid var(--card-border);
-    margin-bottom: 0.75rem;
-}}
-div[role="tablist"] button[role="tab"] {{
-    border: none;
-    padding: 0.55rem 0.95rem;
-    border-radius: 10px;
-    font-weight: 600;
+.stTabs [data-baseweb="tab-list"] {{
+    gap: 0.5rem;
     background: transparent;
-    cursor: pointer;
-    transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
-    color: var(--accent-contrast);
-    box-shadow: none;
-    border: 1px solid transparent;
-}}
-div[role="tablist"] button[role="tab"]:hover {{
-    transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgba(12,12,12,0.08);
-}}
-div[role="tablist"] button[role="tab"][aria-selected="true"] {{
-    background: linear-gradient(90deg, rgba(255,107,107,0.12), rgba(255,142,83,0.10));
-    border: 1px solid rgba(255,107,107,0.18);
-    color: var(--accent-contrast);
-    box-shadow: 0 8px 24px rgba(255,107,107,0.06);
+    padding: 0.5rem;
 }}
 
-/* Content area under tabs: wrap in a card to avoid background noise */
-[role="tabpanel"] > .card {{
-    padding-top: 0.6rem;
-}}
-
-/* Headings inside cards */
-.card h2 {{
-    margin: 0 0 0.6rem 0;
-    color: var(--accent-contrast);
-    font-size: 1.15rem;
-    font-weight: 700;
-}}
-.card h3 {{
-    margin: 0 0 0.45rem 0;
-    color: var(--accent-contrast);
+.stTabs [data-baseweb="tab"] {{
+    height: auto;
+    background: linear-gradient(135deg, rgba(255,255,255,0.6), rgba(248,250,252,0.6));
+    border-radius: 12px;
+    padding: 0.85rem 2rem;
     font-size: 1rem;
-    font-weight: 650;
+    font-weight: 600;
+    color: var(--muted);
+    border: 2px solid transparent;
+    transition: var(--transition);
+    letter-spacing: 0.3px;
 }}
 
-/* Stat grid: uniform cards for metrics */
+.stTabs [data-baseweb="tab"]:hover {{
+    background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(248,250,252,0.9));
+    color: var(--accent-contrast);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}}
+
+.stTabs [data-baseweb="tab"][aria-selected="true"] {{
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: white;
+    border-color: rgba(255,255,255,0.3);
+    box-shadow: 0 6px 20px rgba(255,107,107,0.35);
+}}
+
+.stTabs [data-baseweb="tab-panel"] {{
+    padding: 1.5rem 0.5rem 0.5rem 0.5rem;
+}}
+
+/* Section headers with card background */
+.section-header {{
+    background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08));
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px;
+    margin: 1.75rem 0 1.25rem 0;
+    border-left: 4px solid var(--accent-1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}}
+
+.section-header h2 {{
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--accent-contrast);
+    letter-spacing: -0.5px;
+}}
+
+.section-header h3 {{
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent-contrast);
+    letter-spacing: -0.3px;
+}}
+
+/* Generic card */
+.card {{
+    background: var(--card-bg);
+    border-radius: var(--card-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--card-border);
+    position: relative;
+    z-index: 2;
+    margin-bottom: 1.25rem;
+    transition: var(--transition);
+}}
+
+.card:hover {{
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+}}
+
+/* Stats grid - Enhanced design */
 .stat-grid {{
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 0.9rem;
-    margin-bottom: 0.6rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.25rem;
+    margin: 1.5rem 0;
 }}
+
 .stat {{
-    background: linear-gradient(180deg, rgba(255,255,255,0.99), rgba(247,247,247,0.99));
-    padding: 0.9rem;
-    border-radius: 10px;
-    border: 1px solid rgba(0,0,0,0.03);
+    background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(250,252,255,0.98));
+    border-radius: 14px;
+    padding: 1.5rem 1.25rem;
     text-align: center;
-}}
-.stat .label {{ color: var(--muted); font-size:0.88rem; margin-bottom:6px; }}
-.stat .value {{ font-weight:700; font-size:1.45rem; color:var(--accent-contrast); }}
-
-/* EDA image grid - uniform cards, consistent image size */
-.eda-grid {{
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1rem;
-}}
-.eda-item {{
-    border-radius: 10px;
+    border: 2px solid rgba(102,126,234,0.12);
+    transition: var(--transition);
+    position: relative;
     overflow: hidden;
-    display:flex;
-    flex-direction:column;
-    height: 260px; /* uniform item height */
-    border: 1px solid rgba(0,0,0,0.04);
-    background: linear-gradient(180deg, #fff, #fbfbfb);
-}}
-.eda-item img {{
-    width:100%;
-    height: 170px; /* allocate top area for image */
-    object-fit: cover;
-    display:block;
-    flex-shrink:0;
-}}
-.eda-caption {{
-    padding: 0.6rem;
-    font-size:0.9rem;
-    color: var(--muted);
-    border-top: 1px dashed rgba(0,0,0,0.03);
-    background: rgba(255,255,255,0.97);
-    flex:1;
 }}
 
-/* Recipe grid and cards */
-.recipe-grid {{
+.stat::before {{
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}}
+
+.stat:hover {{
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(102,126,234,0.2);
+    border-color: var(--accent-1);
+}}
+
+.stat:hover::before {{
+    opacity: 1;
+}}
+
+.stat .label {{
+    font-size: 0.95rem;
+    color: var(--muted);
+    margin-bottom: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}}
+
+.stat .value {{
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -1px;
+}}
+
+/* EDA Image cards - Optimized layout */
+.eda-container {{
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 1.5rem;
+    margin: 1.5rem 0;
 }}
+
+.eda-card {{
+    background: var(--card-bg);
+    border-radius: var(--card-radius);
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--card-border);
+    transition: var(--transition);
+    overflow: hidden;
+}}
+
+.eda-card:hover {{
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+    border-color: rgba(102,126,234,0.3);
+}}
+
+.eda-card img {{
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    display: block;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}}
+
+.eda-caption {{
+    background: linear-gradient(135deg, rgba(102,126,234,0.05), rgba(118,75,162,0.05));
+    padding: 0.85rem 1.1rem;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    color: var(--muted);
+    font-weight: 500;
+    line-height: 1.6;
+    border-left: 3px solid var(--accent-1);
+}}
+
+.eda-caption strong {{
+    color: var(--accent-contrast);
+    font-weight: 700;
+}}
+
+/* Recipe card + shimmer effect */
 .recipe-card {{
-    padding: 0.9rem;
-    border-radius: 12px;
-    transition: transform .18s ease, box-shadow .18s ease;
-    border: 1px solid rgba(0,0,0,0.04);
-    min-height: 130px;
-    background: linear-gradient(180deg,#fff,#fbfbfb);
+    background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(250,252,255,0.98));
+    padding: 1.25rem;
+    border-radius: 14px;
+    border: 2px solid rgba(102,126,234,0.12);
+    transition: var(--transition);
+    min-height: 160px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }}
+
 .recipe-card:hover {{
     transform: translateY(-6px);
-    box-shadow: 0 18px 36px rgba(12,12,12,0.10);
-    border-color: rgba(255,107,107,0.14);
+    box-shadow: 0 20px 40px rgba(102,126,234,0.2);
+    border-color: var(--accent-1);
 }}
-.recipe-title {{ font-weight:700; color:var(--accent-contrast); margin-bottom:6px; }}
-.recipe-sub {{ color:var(--muted); font-size:0.86rem; }}
 
-/* shimmer for cards (subtle) */
 .recipe-card::after {{
     content: "";
     position: absolute;
     inset: 0;
+    background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.2) 40%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.2) 60%, transparent 100%);
+    transform: translateX(-120%);
+    transition: transform 0.8s ease;
     pointer-events: none;
-    background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.12) 40%, rgba(255,255,255,0.16) 50%, transparent 60%);
+    border-radius: 14px;
     opacity: 0;
-    transform: translateX(-160%);
-    transition: transform .9s ease, opacity .35s ease;
-    border-radius: 12px;
 }}
+
 .recipe-card:hover::after {{
-    transform: translateX(160%);
+    transform: translateX(120%);
     opacity: 1;
 }}
 
-/* footer */
+.recipe-title {{
+    font-weight: 700;
+    color: var(--accent-contrast);
+    margin-bottom: 0.5rem;
+    font-size: 1.05rem;
+    line-height: 1.4;
+    letter-spacing: -0.2px;
+}}
+
+.recipe-sub {{
+    color: var(--muted-light);
+    font-size: 0.88rem;
+    line-height: 1.5;
+    font-weight: 500;
+}}
+
+.recipe-sub code {{
+    background: rgba(102,126,234,0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+}}
+
+/* Divider */
+.divider {{
+    border: none;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(102,126,234,0.2), transparent);
+    margin: 1.5rem 0;
+}}
+
+/* Footer */
 .footer {{
-    text-align:center;
-    padding:0.9rem;
-    border-radius:10px;
-    color:var(--muted);
-    border:1px solid rgba(0,0,0,0.03);
-    background: rgba(255,255,255,0.95);
-    margin-top: 0.8rem;
+    text-align: center;
+    margin-top: 2.5rem;
+    padding: 1.5rem;
+    color: var(--muted);
+    font-size: 0.95rem;
+    border-radius: var(--card-radius);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--shadow);
+    z-index: 2;
 }}
 
-/* High contrast mode fallback */
+.footer strong {{
+    color: var(--accent-contrast);
+    font-weight: 700;
+}}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {{
+    .eda-container {{
+        grid-template-columns: 1fr;
+    }}
+    
+    .stat-grid {{
+        grid-template-columns: repeat(2, 1fr);
+    }}
+    
+    .main-header h1 {{
+        font-size: 1.8rem;
+    }}
+}}
+
+/* High contrast mode support */
 @media (prefers-contrast: more) {{
-  :root {{ --card-bg: #ffffff; --card-border: #00000022; --accent-contrast: #000; }}
+    :root {{
+        --card-bg: #ffffff;
+        --card-border: #000000;
+        --accent-contrast: #000000;
+        --muted: #333333;
+    }}
 }}
 
-/* Responsive tweaks */
-@media (max-width: 640px) {{
-  .eda-item {{ height: 220px; }}
-  .eda-item img {{ height: 130px; }}
+/* Streamlit element overrides */
+.stSelectbox, .stButton {{
+    z-index: 2;
+    position: relative;
 }}
+
+div[data-testid="stImage"] {{
+    border-radius: 10px;
+    overflow: hidden;
+}}
+
 </style>
 """, unsafe_allow_html=True)
 
-# overlay element to improve legibility over bg image
+# overlay element
 st.markdown('<div class="app-overlay"></div>', unsafe_allow_html=True)
 
-# ---------- Data loader ----------
+# --- Load pickles cached resource ---
 @st.cache_resource
 def load_data():
     with open('recommendations.pkl', 'rb') as f:
@@ -257,76 +439,93 @@ def load_data():
 
 recs, recipe_info = load_data()
 
-# ---------- Header ----------
+# --- header ---
 st.markdown("""
 <div class="main-header">
-  <h1>NHÓM 8 - Recipe Recommender System</h1>
-  <p>Personalized recommendations — 872K ratings | Hybrid SVD + CBF</p>
+    <h1>🍳 NHÓM 8 - Recipe Recommender System</h1>
+    <div class="subtitle">Personalized recommendations from 872K ratings</div>
 </div>
 """, unsafe_allow_html=True)
 
-# ---------- Tabs (wrapped content) ----------
-tab1, tab2 = st.tabs(["Data & EDA", "Model & Recommendation"])
+# === 2 TABS ===
+tab1, tab2 = st.tabs(["📊 Data & EDA", "🤖 Model & Recommendation"])
 
 with tab1:
-    # outer card to ensure both tab header and content appear inside a framed card
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-
-    st.markdown('<h2>Tổng quan Dữ liệu</h2>', unsafe_allow_html=True)
-
-    # stat grid inside card
+    # Section header
     st.markdown("""
-    <div class="stat-grid">
-      <div class="stat"><div class="label">Tổng Ratings</div><div class="value">872,021</div></div>
-      <div class="stat"><div class="label">Số User (≥5)</div><div class="value">23,086</div></div>
-      <div class="stat"><div class="label">Tổng Recipes</div><div class="value">231,637</div></div>
-      <div class="stat"><div class="label">Rating TB</div><div class="value">4.41</div></div>
+    <div class="section-header">
+        <h2>📈 Tổng quan Dữ liệu</h2>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<hr style="border:none;height:1px;background:linear-gradient(90deg,rgba(0,0,0,0.04),rgba(0,0,0,0.02));margin:10px 0 14px 0;">', unsafe_allow_html=True)
+    # stat grid
+    st.markdown("""
+    <div class="stat-grid">
+        <div class="stat">
+            <div class="label">Tổng Ratings</div>
+            <div class="value">872,021</div>
+        </div>
+        <div class="stat">
+            <div class="label">Số User (≥5)</div>
+            <div class="value">23,086</div>
+        </div>
+        <div class="stat">
+            <div class="label">Tổng Recipes</div>
+            <div class="value">231,637</div>
+        </div>
+        <div class="stat">
+            <div class="label">Rating TB</div>
+            <div class="value">4.41</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    # EDA section heading inside card
-    st.markdown('<h3>Phân tích Dữ liệu (EDA)</h3>', unsafe_allow_html=True)
+    st.markdown('<hr class="divider">', unsafe_allow_html=True)
 
-    # collect image paths
-    eda_imgs = [
-        ("assets/eda_rating_distribution.png", "**Phân bố điểm đánh giá**: Hầu hết chấm 4-5 sao."),
-        ("assets/eda_Ratings_per_Recipe.png", "**Số lượt đánh giá mỗi công thức**: Phân bố lệch phải."),
-        ("assets/eda_Average Rating vs Number of Ingredients.png", "**Số nguyên liệu vs Rating**: Công thức 5-10 nguyên liệu có rating tốt hơn."),
-        ("assets/eda_Word Cloud for Ingredients.png", "**Từ khóa nguyên liệu phổ biến**."),
-        ("assets/eda_Word Cloud for Tags.png", "**Từ khóa thẻ (tags)**.")
+    # EDA Section
+    st.markdown("""
+    <div class="section-header">
+        <h3>🔍 Phân tích Dữ liệu (EDA)</h3>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # EDA images with optimized card layout
+    eda_images = [
+        (ASSETS / "eda_rating_distribution.png", "**Phân bố điểm đánh giá**: Hầu hết người dùng chấm 4-5 sao, cho thấy chất lượng công thức tốt."),
+        (ASSETS / "eda_Ratings_per_Recipe.png", "**Số lượt đánh giá mỗi công thức**: Phân bố lệch phải với một số công thức rất phổ biến."),
+        (ASSETS / "eda_Average Rating vs Number of Ingredients.png", "**Số nguyên liệu vs Rating**: Mối quan hệ giữa độ phức tạp và đánh giá của người dùng."),
+        (ASSETS / "eda_Word Cloud for Ingredients.png", "**Từ khóa nguyên liệu phổ biến**: Các nguyên liệu được sử dụng nhiều nhất trong dataset."),
+        (ASSETS / "eda_Word Cloud for Tags.png", "**Từ khóa thẻ (tags)**: Phân loại công thức theo các đặc điểm và danh mục phổ biến."),
     ]
 
-    # render images in a responsive grid (uniform sizes)
-    st.markdown('<div class="eda-grid">', unsafe_allow_html=True)
-    for p, caption in eda_imgs:
-        if Path(p).exists():
-            # each item in a small card with image + caption inside
-            st.markdown(f'''
-                <div class="eda-item">
-                    <img src="{p}" alt="eda">
-                    <div class="eda-caption">{caption}</div>
-                </div>
-            ''', unsafe_allow_html=True)
+    st.markdown('<div class="eda-container">', unsafe_allow_html=True)
+    for img_path, caption in eda_images:
+        if img_path.exists():
+            img_b64 = get_base64_image(img_path)
+            st.markdown(f"""
+            <div class="eda-card">
+                <img src="data:image/png;base64,{img_b64}" alt="{caption}">
+                <div class="eda-caption">{caption}</div>
+            </div>
+            """, unsafe_allow_html=True)
         else:
-            st.markdown(f'''
-                <div class="eda-item" style="align-items:center;justify-content:center;display:flex;">
-                    <div style="padding:10px;color:var(--muted);">Missing: {p}</div>
-                </div>
-            ''', unsafe_allow_html=True)
+            st.markdown(f"""
+            <div class="eda-card">
+                <div class="eda-caption">⚠️ Missing image: {img_path.name}</div>
+            </div>
+            """, unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown('</div>', unsafe_allow_html=True)  # close outer card for tab1
 
 with tab2:
-    # outer card
+    st.markdown("""
+    <div class="section-header">
+        <h2>⚙️ Chọn Model & User</h2>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Model and user selection in card
     st.markdown('<div class="card">', unsafe_allow_html=True)
-
-    st.markdown('<h2>Model & Recommendation</h2>', unsafe_allow_html=True)
-
-    # model selection inside small card
-    st.markdown('<div class="card" style="padding:0.6rem;margin-bottom:0.8rem;">', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1:
         model_choice = st.selectbox(
@@ -339,16 +538,19 @@ with tab2:
         try:
             user_list = sorted([str(x) for x in recs[model_key].keys()])
         except Exception:
-            user_list = ["user_1","user_2"]
-        user_id = st.selectbox("Chọn User ID", user_list, help="Top users by interactions")
+            user_list = ["user_1", "user_2"]
+        user_id = st.selectbox("Chọn User ID", user_list, help="10 user có nhiều tương tác nhất")
     st.markdown('</div>', unsafe_allow_html=True)
 
-    if st.button("Recommend Top-20", type="primary", use_container_width=True):
+    if st.button("🎯 Recommend Top-20", type="primary", use_container_width=True):
         top20 = recs[model_key].get(user_id, [])
 
-        # performance card
-        st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.markdown('<h3>Hiệu suất Model</h3>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="section-header">
+            <h3>📊 Hiệu suất Model</h3>
+        </div>
+        """, unsafe_allow_html=True)
+
         if model_key == 'fast':
             rmse, r2 = "0.9471", "0.0869"
             p20, r20, ndcg20, map20 = "0.0030", "0.0600", "0.0259", "0.0170"
@@ -357,50 +559,45 @@ with tab2:
             p20, r20, ndcg20, map20 = "0.0020", "0.0400", "0.0141", "0.0067"
 
         st.markdown(f"""
-            <div class="stat-grid" style="margin-top:6px;">
+            <div class="stat-grid">
                 <div class="stat"><div class="label">RMSE</div><div class="value">{rmse}</div></div>
                 <div class="stat"><div class="label">R²</div><div class="value">{r2}</div></div>
                 <div class="stat"><div class="label">P@20</div><div class="value">{p20}</div></div>
                 <div class="stat"><div class="label">R@20</div><div class="value">{r20}</div></div>
             </div>
         """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
 
-        # recommendations grid
-        st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.markdown('<h3>Top-20 Recipe Đề Xuất</h3>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="section-header" style="margin-top: 2rem;">
+            <h3>🍽️ Top-20 Recipe Đề Xuất</h3>
+        </div>
+        """, unsafe_allow_html=True)
 
         if not top20:
             st.info("No recommendation available for this user.")
         else:
-            st.markdown('<div class="recipe-grid">', unsafe_allow_html=True)
-            for rid in top20:
-                info = recipe_info.get(rid, {})
-                name = info.get('name', f"Recipe {rid}")
-                tags = ", ".join(info.get('tags', [])[:3])
-                # show thumbnail if exists in info (not required)
-                thumb_html = ""
-                if info.get('image') and isinstance(info.get('image'), str):
-                    thumb_html = f'<img src="{info["image"]}" style="width:100%;height:110px;object-fit:cover;border-radius:8px;margin-bottom:8px;">'
-                st.markdown(f'''
+            cols = st.columns(4)
+            for i, rid in enumerate(top20):
+                with cols[i % 4]:
+                    info = recipe_info.get(rid, {})
+                    name = info.get('name', f"Recipe {rid}")
+                    tags = ", ".join(info.get('tags', [])[:2]) or "No tags"
+                    st.markdown(f"""
                     <div class="recipe-card">
-                        {thumb_html}
-                        <div class="recipe-title">{name}</div>
-                        <div class="recipe-sub"><code style="color:var(--muted);">{rid}</code></div>
-                        <div style="height:6px"></div>
-                        <div class="recipe-sub">Tags: {tags}</div>
+                        <div>
+                            <div class="recipe-title">{name}</div>
+                            <div class="recipe-sub"><code>{rid}</code></div>
+                        </div>
+                        <div class="recipe-sub" style="margin-top: 0.75rem;">
+                            <strong>Tags:</strong> {tags}
+                        </div>
                     </div>
-                ''', unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)  # close recipe-grid
+                    """, unsafe_allow_html=True)
 
-        st.markdown('</div>', unsafe_allow_html=True)  # close recommendations card
-
-    st.markdown('</div>', unsafe_allow_html=True)  # close outer card for tab2
-
-# Footer
+# footer
 st.markdown("""
 <div class='footer'>
-  <div style="font-weight:700">NHÓM 8 - Recipe Recommender System</div>
-  <div style="font-size:0.92rem;margin-top:6px;color:var(--muted)">Personalized recommendations from 872K ratings — Hybrid SVD + CBF</div>
+    <p><strong>NHÓM 8</strong> | Recipe Recommender System | Project 2025</p>
+    <p><em>Đề xuất cá nhân hóa từ 872K đánh giá – Hybrid SVD + CBF</em></p>
 </div>
 """, unsafe_allow_html=True)
