@@ -1,4 +1,4 @@
-# app.py (REPLACE your file with this)
+# app.py (fixed: avoid f-string brace issue)
 import streamlit as st
 import pickle
 from pathlib import Path
@@ -16,10 +16,10 @@ def get_base64_image(image_path):
 
 bg_b64 = get_base64_image(ASSETS / "bg_food.jpg")
 
-# ============== CSS (accessible, controlled cards and fake tabs) ==============
-st.markdown(f"""
+# ============== CSS template (use placeholder __BG__ to avoid f-string brace issues) ==============
+css_template = """
 <style>
-:root {{
+:root {
   --card-radius: 14px;
   --accent-1: #FF6B6B;
   --accent-2: #FF8E53;
@@ -30,24 +30,24 @@ st.markdown(f"""
   --shadow: 0 10px 30px rgba(12,12,12,0.08);
   --tab-height: 48px;
   font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-}}
+}
 
 /* Page background */
-.stApp {{
-    background-image: url("data:image/jpg;base64,{bg_b64}");
+.stApp {
+    background-image: url("data:image/jpg;base64,__BG__");
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-}}
+}
 /* Soft overlay to improve contrast */
-.app-overlay {{
+.app-overlay {
     position: absolute; inset: 0; z-index: 0;
     background: linear-gradient(rgba(255,255,255,0.66), rgba(255,255,255,0.66));
     pointer-events: none;
-}}
+}
 
 /* Outer container card that will contain the fake-tabs and content */
-.outer-card {{
+.outer-card {
   background: var(--card-bg);
   border-radius: var(--card-radius);
   padding: 1rem;
@@ -56,16 +56,16 @@ st.markdown(f"""
   margin-bottom: 1rem;
   position: relative;
   z-index: 2;
-}}
+}
 
 /* Fake tabs (radio look) */
-.fake-tabs {{
+.fake-tabs {
   display:flex;
   gap:8px;
   align-items:center;
   margin-bottom:10px;
-}}
-.fake-tab {{
+}
+.fake-tab {
   height: var(--tab-height);
   padding: 0 18px;
   border-radius: 10px;
@@ -79,7 +79,7 @@ st.markdown(f"""
   border: 1px solid rgba(0,0,0,0.03);
   transition: all .22s ease;
 }
-.fake-tab.selected {{
+.fake-tab.selected {
   color: white;
   background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
   box-shadow: 0 8px 20px rgba(255,107,107,0.15);
@@ -87,49 +87,49 @@ st.markdown(f"""
 }
 
 /* Heading inside card */
-.card-heading {{
+.card-heading {
   font-size:1.25rem;
   font-weight:700;
   color:var(--text);
   margin-bottom:6px;
-}}
-.card-subhead {{
+}
+.card-subhead {
   color:var(--muted);
   margin-bottom:10px;
-}}
+}
 
 /* stat grid */
-.stat-grid {{
+.stat-grid {
   display:grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap:12px;
-}}
-.stat {{
+}
+.stat {
   background: linear-gradient(180deg, rgba(255,255,255,0.99), rgba(250,250,250,0.99));
   padding:10px;
   border-radius:10px;
   border:1px solid rgba(0,0,0,0.03);
   text-align:center;
-}}
-.stat .label {{ color:var(--muted); font-size:0.9rem; }}
-.stat .value {{ font-size:1.35rem; font-weight:700; color:var(--text); }}
+}
+.stat .label { color:var(--muted); font-size:0.9rem; }
+.stat .value { font-size:1.35rem; font-weight:700; color:var(--text); }
 
 /* EDA image grid: use HTML images for precise layout */
-.eda-grid {{
+.eda-grid {
   display:grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap:12px;
   margin-top:8px;
-}}
-.eda-item img {{
+}
+.eda-item img {
   width:100%;
   height:220px;
   object-fit:cover;
   border-radius:10px;
   display:block;
   border:1px solid rgba(0,0,0,0.04);
-}}
-.eda-caption {{
+}
+.eda-caption {
   background: rgba(255,255,255,0.95);
   padding:8px;
   border-radius:8px;
@@ -137,22 +137,22 @@ st.markdown(f"""
   color:var(--muted);
   font-size:0.9rem;
   border:1px solid rgba(0,0,0,0.03);
-}}
+}
 
 /* Recipe grid and recipe card */
-.recipe-grid {{
+.recipe-grid {
   display:grid;
   grid-template-columns: repeat(4, 1fr);
   gap:12px;
   margin-top:12px;
-}}
-@media (max-width: 1000px) {{
-  .recipe-grid {{ grid-template-columns: repeat(2, 1fr); }}
-}}
-@media (max-width: 600px) {{
-  .recipe-grid {{ grid-template-columns: 1fr; }}
-}}
-.recipe-card {{
+}
+@media (max-width: 1000px) {
+  .recipe-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .recipe-grid { grid-template-columns: 1fr; }
+}
+.recipe-card {
   background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,250,250,0.98));
   padding:12px;
   border-radius:10px;
@@ -162,28 +162,31 @@ st.markdown(f"""
   border:1px solid rgba(0,0,0,0.03);
   transition: transform .22s ease, box-shadow .22s ease;
   position:relative;
-}}
-.recipe-card:hover {{
+}
+.recipe-card:hover {
   transform: translateY(-6px);
   box-shadow: 0 20px 40px rgba(12,12,12,0.12);
-}}
-.recipe-title {{ font-weight:700; color:var(--text); margin-bottom:6px; }}
-.recipe-meta {{ color:var(--muted); font-size:0.88rem; }}
+}
+.recipe-title { font-weight:700; color:var(--text); margin-bottom:6px; }
+.recipe-meta { color:var(--muted); font-size:0.88rem; }
 
 /* footer */
-.footer {{
+.footer {
   text-align:center;
   color:var(--muted);
   margin-top:10px;
   font-size:0.95rem;
-}}
+}
 
 /* accessibility: high contrast fallback */
-@media (prefers-contrast: more) {{
-  :root {{ --card-bg: #fff; --text: #000; --muted:#333; }}
-}}
+@media (prefers-contrast: more) {
+  :root { --card-bg: #fff; --text: #000; --muted:#333; }
+}
 </style>
-""", unsafe_allow_html=True)
+"""
+
+css = css_template.replace("__BG__", bg_b64)
+st.markdown(css, unsafe_allow_html=True)
 
 # overlay to increase contrast
 st.markdown('<div class="app-overlay"></div>', unsafe_allow_html=True)
@@ -238,7 +241,6 @@ if tab == "Data & EDA":
     st.markdown('<div class="card-heading">Tổng quan Dữ liệu</div>', unsafe_allow_html=True)
     st.markdown('<div class="card-subhead">Các chỉ số tóm tắt của bộ dữ liệu (số liệu đã tiền xử lý)</div>', unsafe_allow_html=True)
 
-    # stat grid using HTML so it won't create stray streamlit boxes
     st.markdown("""
     <div class="stat-grid" style="margin-top:8px;">
       <div class="stat"><div class="label">Tổng Ratings</div><div class="value">872,021</div></div>
@@ -250,11 +252,9 @@ if tab == "Data & EDA":
 
     st.markdown('<hr style="margin:14px 0;border:none;border-top:1px solid rgba(0,0,0,0.05)">', unsafe_allow_html=True)
 
-    # EDA heading (in card)
     st.markdown('<div class="card-heading">Phân tích Dữ liệu (EDA)</div>', unsafe_allow_html=True)
     st.markdown('<div class="card-subhead">Các biểu đồ chính — bố cục ảnh được điều chỉnh đều, caption nằm trong card nhỏ bên dưới ảnh.</div>', unsafe_allow_html=True)
 
-    # list of eda images with captions (adjust to whatever exists)
     eda_items = [
         ("assets/eda_rating_distribution.png", "Phân bố điểm đánh giá: Hầu hết chấm 4-5 sao."),
         ("assets/eda_Ratings_per_Recipe.png", "Số lượt đánh giá mỗi công thức: phân bố lệch phải."),
@@ -263,7 +263,6 @@ if tab == "Data & EDA":
         ("assets/eda_Word Cloud for Tags.png", "Từ khóa thẻ (tags).")
     ]
 
-    # render grid with HTML images to avoid streamlit image boxes (keeps layout clean)
     eda_html = ['<div class="eda-grid">']
     for img_path, caption in eda_items:
         if Path(img_path).exists():
@@ -298,10 +297,8 @@ else:
         if st.button("Recommend Top-20", use_container_width=True):
             pass
 
-    # On button click show metrics and recipes
     if st.button("Run Recommendation", key="run_rec"):
         top20 = recs.get(model_key, {}).get(user_id, [])
-        # metrics block
         st.markdown("""
         <div style="margin-top:8px;">
           <div class="stat-grid">
@@ -319,7 +316,6 @@ else:
         if not top20:
             st.info("Không có đề xuất cho user này.")
         else:
-            # recipe grid
             html = ['<div class="recipe-grid">']
             for rid in top20:
                 info = recipe_info.get(rid, {})
