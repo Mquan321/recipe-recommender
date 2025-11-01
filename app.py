@@ -233,10 +233,11 @@ with tab2:
 
 st.markdown("""
 <div class='footer'>
-    <p><strong>NHÓM 8</strong> | Recipe Recommender System | Data Science Project 2025</p>
+    <p><strong>NHÓM 8</strong> | Recipe Recommender System | Project 2025</p>
     <p><em>Đề xuất món ăn cá nhân hóa từ 872K đánh giá – Hybrid SVD + CBF</em></p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
