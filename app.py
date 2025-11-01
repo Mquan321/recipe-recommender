@@ -14,7 +14,7 @@ def get_base64_image(image_path):
     with open(image_path, "rb") as img_file:
         return base64.b64encode(img_file.read()).decode()
 
-bg_img = get_base64_image("")
+bg_img = get_base64_image("assets/background_food.jpg")
 
 st.markdown(f"""
 <style>
@@ -237,4 +237,5 @@ st.markdown("""
     <p><em>Đề xuất món ăn cá nhân hóa từ 872K đánh giá – Hybrid SVD + CBF</em></p>
 </div>
 """, unsafe_allow_html=True)
+
 
