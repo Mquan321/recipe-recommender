@@ -3,112 +3,208 @@ import streamlit as st
 import pickle
 import base64
 
+# === CẤU HÌNH TRANG ===
 st.set_page_config(
-    page_title="NHÓM 8- Recipe Recommender",
+    page_title="NHÓM 8 - Recipe Recommender",
     page_icon="Cooking",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
+# === HÀM MÃ HÓA ẢNH ===
 def get_base64_image(image_path):
-    with open(image_path, "rb") as img_file:
-        return base64.b64encode(img_file.read()).decode()
+    try:
+        with open(image_path, "rb") as img_file:
+            return base64.b64encode(img_file.read()).decode()
+    except:
+        return None
 
 bg_img = get_base64_image("assets/bg_food.jpg")
 
+# === CSS ĐẸP, SẠCH, HIỆU ỨNG LẤP LÁNH ===
 st.markdown(f"""
 <style>
+    /* Background + Overlay */
     .stApp {{
         background-image: url("data:image/jpg;base64,{bg_img}");
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
     }}
-    .background-overlay {{
+    .overlay {{
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(255, 255, 255, 0.92);
+        background: rgba(255, 255, 255, 0.94);
         z-index: -1;
     }}
+
+    /* Container chính */
+    .main-container {{
+        background: rgba(255, 255, 255, 0.96);
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        margin: 1rem auto;
+        max-width: 1400px;
+    }}
+
+    /* Header */
     .main-header {{
-        background: linear-gradient(90deg, #FF6B6B, #FF8E53);
-        padding: 1.5rem;
-        border-radius: 15px;
+        background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+        padding: 1.8rem;
+        border-radius: 16px;
         text-align: center;
-        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
         margin-bottom: 2rem;
-        position: relative;
-        z-index: 1;
+        transform: translateY(0);
+        transition: all 0.3s ease;
+    }}
+    .main-header:hover {{
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(255, 82, 82, 0.4);
     }}
     .main-header h1 {{
         color: white;
         margin: 0;
-        font-size: 2.5rem;
-        font-weight: 700;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        font-size: 2.8rem;
+        font-weight: 800;
+        text-shadow: 0 3px 6px rgba(0,0,0,0.3);
     }}
-    .tab-content {{
-        background-color: rgba(255, 255, 255, 0.95);
-        padding: 2rem;
-        border-radius: 15px;
-        box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+
+    /* Tab Container */
+    .tab-container {{
+        background: rgba(255, 255, 255, 0.97);
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        border: 1px solid rgba(0,0,0,0.05);
         margin-bottom: 1.5rem;
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
     }}
-    .metric-card {{
-        background-color: white;
-        padding: 1.2rem;
+
+    /* Tab Button - Hiệu ứng lấp lánh */
+    .stTabs [data-baseWeb="tab"] {{
+        background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+        color: #495057;
         border-radius: 12px;
-        box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-        text-align: center;
-        border: 1px solid #f0f0f0;
+        padding: 0.8rem 1.5rem;
+        margin: 0 0.5rem;
+        font-weight: 600;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
     }}
-    .recipe-card {{
-        background-color: white;
-        padding: 1.2rem;
+    .stTabs [data-baseWeb="tab"]:hover {{
+        background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(255, 107, 107, 0.3);
+        border-color: #FF6B6B;
+    }}
+    .stTabs [data-baseWeb="tab"]:hover::after {{
+        content: '';
+        position: absolute;
+        top: 50%; left: 50%;
+        width: 300px; height: 300px;
+        background: rgba(255,255,255,0.3);
+        border-radius: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        animation: ripple 0.6s ease-out;
+    }}
+    @keyframes ripple {{
+        to {{
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 0;
+        }}
+    }}
+
+    /* Nội dung tab */
+    .tab-content {{
+        background: rgba(255, 255, 255, 0.98);
+        padding: 2rem;
         border-radius: 14px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.04);
+        min-height: 500px;
+    }}
+
+    /* Metric Card */
+    .metric-card {{
+        background: white;
+        padding: 1.3rem;
+        border-radius: 12px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        text-align: center;
+        border: 1px solid #f1f3f5;
         height: 100%;
         transition: all 0.3s ease;
-        border: 1px solid #eee;
+    }}
+    .metric-card:hover {{
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        border-color: #FF6B6B;
+    }}
+
+    /* Recipe Card */
+    .recipe-card {{
+        background: white;
+        padding: 1.3rem;
+        border-radius: 14px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+        height: 100%;
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
     }}
     .recipe-card:hover {{
         transform: translateY(-6px);
-        box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        box-shadow: 0 12px 28px rgba(255, 107, 107, 0.2);
         border-color: #FF6B6B;
     }}
+
+    /* Button */
     .stButton>button {{
         background: linear-gradient(45deg, #FF6B6B, #FF8E53);
         color: white;
         border: none;
         border-radius: 12px;
-        padding: 0.7rem 1.8rem;
-        font-weight: 600;
+        padding: 0.8rem 2rem;
+        font-weight: 700;
         width: 100%;
         font-size: 1.1rem;
-        box-shadow: 0 4px 8px rgba(255, 107, 107, 0.3);
+        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        transition: all 0.3s ease;
     }}
     .stButton>button:hover {{
         background: linear-gradient(45deg, #FF5252, #FF7043);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(255, 82, 82, 0.4);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(255, 82, 82, 0.4);
     }}
+
+    /* Footer */
     .footer {{
         text-align: center;
         margin-top: 3rem;
         padding: 2rem;
         color: #555;
         font-size: 0.95rem;
-        background: rgba(255, 255, 255, 0.9);
-        border-radius: 12px;
-        backdrop-filter: blur(5px);
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 14px;
+        backdrop-filter: blur(6px);
+        border: 1px solid rgba(0,0,0,0.05);
     }}
+
+    /* Ẩn khung thừa của Streamlit */
+    .css-1d391kg, .css-1y0t6an, .css-1cpxqw2 {{ display: none !important; }}
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="background-overlay"></div>', unsafe_allow_html=True)
+# === OVERLAY + CONTAINER CHÍNH ===
+st.markdown('<div class="overlay"></div>', unsafe_allow_html=True)
+st.markdown('<div class="main-container">', unsafe_allow_html=True)
 
+# === TẢI DỮ LIỆU ===
 @st.cache_resource
 def load_data():
     with open('recommendations.pkl', 'rb') as f:
@@ -119,16 +215,21 @@ def load_data():
 
 recs, recipe_info = load_data()
 
+# === HEADER ===
 st.markdown("""
 <div class="main-header">
     <h1>NHÓM 8 - Recipe Recommender System</h1>
 </div>
 """, unsafe_allow_html=True)
 
-# === 2 TABS ===
+# === 2 TABS TRONG KHUNG ===
+st.markdown('<div class="tab-container">', unsafe_allow_html=True)
 tab1, tab2 = st.tabs(["Data & EDA", "Model & Recommendation"])
+st.markdown('</div>', unsafe_allow_html=True)
 
-
+# ========================================
+# TAB 1: DATA & EDA
+# ========================================
 with tab1:
     st.markdown("<div class='tab-content'>", unsafe_allow_html=True)
 
@@ -170,7 +271,9 @@ with tab1:
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-
+# ========================================
+# TAB 2: MODEL & RECOMMENDATION
+# ========================================
 with tab2:
     st.markdown("<div class='tab-content'>", unsafe_allow_html=True)
 
@@ -219,18 +322,19 @@ with tab2:
         cols = st.columns(4)
         for i, rid in enumerate(top20):
             with cols[i % 4]:
-                name = recipe_info[rid]['name']
-                tags = ", ".join(recipe_info[rid]['tags'][:2])
+                name = recipe_info.get(rid, {}).get('name', 'Unknown')
+                tags = ", ".join(recipe_info.get(rid, {}).get('tags', [])[:2])
                 st.markdown(f"""
                 <div class='recipe-card'>
                     <p style='margin:0;font-weight:600;color:#333;font-size:1.1rem;'>{name}</p>
                     <p style='margin:0.3rem 0 0;font-size:0.9rem;color:#666;'><code>{rid}</code></p>
                     <p style='margin:0.2rem 0 0;font-size:0.85rem;color:#FF6B6B;'>Tags: {tags}</p>
                 </div>
-                 """, unsafe_allow_html=True)
+                """, unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
+# === FOOTER ===
 st.markdown("""
 <div class='footer'>
     <p><strong>NHÓM 8</strong> | Recipe Recommender System | Project 2025</p>
@@ -238,9 +342,4 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-
-
-
-
-
-
+st.markdown('</div>', unsafe_allow_html=True)  # Đóng main-container
