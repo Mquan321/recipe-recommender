@@ -121,7 +121,7 @@ recs, recipe_info = load_data()
 
 st.markdown("""
 <div class="main-header">
-    <h1>Cooking NHÓM 10 - Recipe Recommender System</h1>
+    <h1>NHÓM 8 - Recipe Recommender System</h1>
 </div>
 """, unsafe_allow_html=True)
 
@@ -237,6 +237,7 @@ st.markdown("""
     <p><em>Đề xuất món ăn cá nhân hóa từ 872K đánh giá – Hybrid SVD + CBF</em></p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
