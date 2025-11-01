@@ -524,8 +524,6 @@ with tab2:
     </div>
     """, unsafe_allow_html=True)
 
-    # Model and user selection in card
-    st.markdown('<div class="card">', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1:
         model_choice = st.selectbox(
@@ -535,15 +533,14 @@ with tab2:
         )
         model_key = 'fast' if "Simple" in model_choice else 'best'
     with col2:
-        try:
-            user_list = sorted([str(x) for x in recs[model_key].keys()])
-        except Exception:
-            user_list = ["user_1", "user_2"]
-        user_id = st.selectbox("Chọn User ID", user_list, help="10 user có nhiều tương tác nhất")
-    st.markdown('</div>', unsafe_allow_html=True)
+        user_id = st.selectbox(
+            "Chọn User ID",
+            sorted(recs[model_key].keys()),
+            help="10 user có nhiều tương tác nhất"
+        )
 
     if st.button("🎯 Recommend Top-20", type="primary", use_container_width=True):
-        top20 = recs[model_key].get(user_id, [])
+        top20 = recs[model_key][user_id]
 
         st.markdown("""
         <div class="section-header">
@@ -558,14 +555,20 @@ with tab2:
             rmse, r2 = "0.9467", "0.0878"
             p20, r20, ndcg20, map20 = "0.0020", "0.0400", "0.0141", "0.0067"
 
-        st.markdown(f"""
-            <div class="stat-grid">
-                <div class="stat"><div class="label">RMSE</div><div class="value">{rmse}</div></div>
-                <div class="stat"><div class="label">R²</div><div class="value">{r2}</div></div>
-                <div class="stat"><div class="label">P@20</div><div class="value">{p20}</div></div>
-                <div class="stat"><div class="label">R@20</div><div class="value">{r20}</div></div>
-            </div>
-        """, unsafe_allow_html=True)
+        colm1, colm2 = st.columns([1, 2])
+        with colm1:
+            st.markdown("<div class='card'>", unsafe_allow_html=True)
+            st.metric("RMSE", rmse)
+            st.metric("R²", r2)
+            st.markdown("</div>", unsafe_allow_html=True)
+        
+        with colm2:
+            st.markdown("### Ranking Metrics @ K=20")
+            colx1, colx2, colx3, colx4 = st.columns(4)
+            colx1.metric("P@20", p20)
+            colx2.metric("R@20", r20)
+            colx3.metric("nDCG@20", ndcg20)
+            colx4.metric("mAP@20", map20)
 
         st.markdown("""
         <div class="section-header" style="margin-top: 2rem;">
@@ -573,26 +576,18 @@ with tab2:
         </div>
         """, unsafe_allow_html=True)
 
-        if not top20:
-            st.info("No recommendation available for this user.")
-        else:
-            cols = st.columns(4)
-            for i, rid in enumerate(top20):
-                with cols[i % 4]:
-                    info = recipe_info.get(rid, {})
-                    name = info.get('name', f"Recipe {rid}")
-                    tags = ", ".join(info.get('tags', [])[:2]) or "No tags"
-                    st.markdown(f"""
-                    <div class="recipe-card">
-                        <div>
-                            <div class="recipe-title">{name}</div>
-                            <div class="recipe-sub"><code>{rid}</code></div>
-                        </div>
-                        <div class="recipe-sub" style="margin-top: 0.75rem;">
-                            <strong>Tags:</strong> {tags}
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
+        cols = st.columns(4)
+        for i, rid in enumerate(top20):
+            with cols[i % 4]:
+                name = recipe_info[rid]['name']
+                tags = ", ".join(recipe_info[rid]['tags'][:2])
+                st.markdown(f"""
+                <div class='recipe-card'>
+                    <p style='margin:0;font-weight:600;color:#333;font-size:1.1rem;'>{name}</p>
+                    <p style='margin:0.3rem 0 0;font-size:0.9rem;color:#666;'><code>{rid}</code></p>
+                    <p style='margin:0.2rem 0 0;font-size:0.85rem;color:#FF6B6B;'>Tags: {tags}</p>
+                </div>
+                """, unsafe_allow_html=True)
 
 # footer
 st.markdown("""
