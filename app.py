@@ -4,7 +4,7 @@ import pickle
 import base64
 
 st.set_page_config(
-    page_title="NHÓM 10 - Recipe Recommender",
+    page_title="NHÓM 8- Recipe Recommender",
     page_icon="Cooking",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -237,6 +237,7 @@ st.markdown("""
     <p><em>Đề xuất món ăn cá nhân hóa từ 872K đánh giá – Hybrid SVD + CBF</em></p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
