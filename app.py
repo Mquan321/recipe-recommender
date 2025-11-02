@@ -516,6 +516,40 @@ with tab1:
             """, unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
+    # EDA Video charts with auto-loop
+    st.markdown('<hr class="divider">', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="section-header">
+        <h3>🎬 Phân tích Động (Dynamic Charts)</h3>
+    </div>
+    """, unsafe_allow_html=True)
+
+    eda_videos = [
+        (ASSETS / "eda_top_popular_recipes.mp4", "**Top Popular Recipes Animation**: Trực quan hóa động các công thức phổ biến nhất theo số lượt đánh giá và rating trung bình. Biểu đồ racing bar chart cho thấy sự cạnh tranh và thay đổi thứ hạng của các món ăn được yêu thích nhất."),
+        (ASSETS / "eda_Time vs Rating Correlation.mp4", "**Time vs Rating Correlation**: Phân tích mối tương quan giữa thời gian nấu và điểm đánh giá theo thời gian. Animation thể hiện xu hướng thay đổi sở thích của người dùng qua các giai đoạn khác nhau."),
+    ]
+
+    st.markdown('<div class="eda-container">', unsafe_allow_html=True)
+    for video_path, caption in eda_videos:
+        if video_path.exists():
+            video_b64 = get_base64_image(video_path)
+            st.markdown(f"""
+            <div class="eda-card">
+                <video width="100%" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);" autoplay loop muted playsinline>
+                    <source src="data:video/mp4;base64,{video_b64}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="eda-caption">{caption}</div>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div class="eda-card">
+                <div class="eda-caption">⚠️ Missing video: {video_path.name}</div>
+            </div>
+            """, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
 
 with tab2:
     st.markdown("""
