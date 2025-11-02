@@ -529,26 +529,29 @@ with tab1:
         (ASSETS / "eda_Time vs Rating Correlation.mp4", "**Time vs Rating Correlation**: Phân tích mối tương quan giữa thời gian nấu và điểm đánh giá theo thời gian. Animation thể hiện xu hướng thay đổi sở thích của người dùng qua các giai đoạn khác nhau."),
     ]
 
-    st.markdown('<div class="eda-container">', unsafe_allow_html=True)
-    for video_path, caption in eda_videos:
-        if video_path.exists():
-            video_b64 = get_base64_image(video_path)
-            st.markdown(f"""
-            <div class="eda-card">
-                <video width="100%" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);" autoplay loop muted playsinline>
-                    <source src="data:video/mp4;base64,{video_b64}" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
-                <div class="eda-caption">{caption}</div>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown(f"""
-            <div class="eda-card">
-                <div class="eda-caption">⚠️ Missing video: {video_path.name}</div>
-            </div>
-            """, unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    # Use same grid as images but center the 2 videos
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown('<div class="eda-container" style="grid-template-columns: repeat(2, 1fr);">', unsafe_allow_html=True)
+        for video_path, caption in eda_videos:
+            if video_path.exists():
+                video_b64 = get_base64_image(video_path)
+                st.markdown(f"""
+                <div class="eda-card">
+                    <video width="100%" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);" autoplay loop muted playsinline>
+                        <source src="data:video/mp4;base64,{video_b64}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <div class="eda-caption">{caption}</div>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div class="eda-card">
+                    <div class="eda-caption">⚠️ Missing video: {video_path.name}</div>
+                </div>
+                """, unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 
 with tab2:
@@ -573,7 +576,7 @@ with tab2:
             help="10 user có nhiều tương tác nhất"
         )
 
-    if st.button("🎯 Recommend Top-20", type="primary", use_container_width=True):
+    if st.button("🎯 Recommend Top-20 Recipes", type="primary", use_container_width=True):
         top20 = recs[model_key][user_id]
 
         st.markdown("""
