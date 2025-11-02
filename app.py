@@ -10,7 +10,6 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- helper ---
 def get_base64_image(image_path):
     with open(image_path, "rb") as img_file:
         return base64.b64encode(img_file.read()).decode()
@@ -19,7 +18,6 @@ ASSETS = Path("assets")
 bg_path = ASSETS / "bg_food.jpg"
 bg_img = get_base64_image(bg_path) if bg_path.exists() else None
 
-# --- CSS: Professional, accessible, cards as layers, tab styling + image optimization ---
 st.markdown(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -425,10 +423,8 @@ div[data-testid="stImage"] {{
 </style>
 """, unsafe_allow_html=True)
 
-# overlay element
 st.markdown('<div class="app-overlay"></div>', unsafe_allow_html=True)
 
-# --- Load pickles cached resource ---
 @st.cache_resource
 def load_data():
     with open('recommendations.pkl', 'rb') as f:
@@ -439,7 +435,6 @@ def load_data():
 
 recs, recipe_info = load_data()
 
-# --- header ---
 st.markdown("""
 <div class="main-header">
     <h1>🍳 NHÓM 8 - Recipe Recommender System</h1>
@@ -447,11 +442,9 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# === 2 TABS ===
 tab1, tab2 = st.tabs(["📊 Data & EDA", "🤖 Model & Recommendation"])
 
 with tab1:
-    # Section header
     st.markdown("""
     <div class="section-header">
         <h2>📈 Tổng quan Dữ liệu</h2>
@@ -485,11 +478,10 @@ with tab1:
     # EDA Section
     st.markdown("""
     <div class="section-header">
-        <h3>🔍 Phân tích Dữ liệu (EDA)</h3>
+        <h3>🔍 EDA</h3>
     </div>
     """, unsafe_allow_html=True)
 
-    # EDA images with optimized card layout
     eda_images = [
         (ASSETS / "eda_rating_distribution.png", "**Phân bố điểm đánh giá**: Hầu hết người dùng chấm 4-5 sao, cho thấy chất lượng công thức tốt."),
         (ASSETS / "eda_Ratings_per_Recipe.png", "**Số lượt đánh giá mỗi công thức**: Phân bố lệch phải với một số công thức rất phổ biến."),
@@ -520,7 +512,7 @@ with tab1:
     st.markdown('<hr class="divider">', unsafe_allow_html=True)
     st.markdown("""
     <div class="section-header">
-        <h3>🎬 Phân tích Động (Dynamic Charts)</h3>
+        <h3>🎬 Dynamic Analysis</h3>
     </div>
     """, unsafe_allow_html=True)
 
@@ -530,7 +522,7 @@ with tab1:
     ]
 
     # Use same grid as images but center the 2 videos
-    col1, col2, col3 = st.columns([1, 2, 1])
+    col1, col2, col3 = st.columns([0.5, 3, 0.5])
     with col2:
         st.markdown('<div class="eda-container" style="grid-template-columns: repeat(2, 1fr);">', unsafe_allow_html=True)
         for video_path, caption in eda_videos:
@@ -587,10 +579,10 @@ with tab2:
 
         if model_key == 'fast':
             rmse, r2 = "0.9471", "0.0869"
-            p20, r20, ndcg20, map20 = "0.0030", "0.0600", "0.0259", "0.0170"
+            p20, r20, ndcg20, map20 = "0.0050", "0.1000", "0.0384", "0.0222"
         else:
             rmse, r2 = "0.9467", "0.0878"
-            p20, r20, ndcg20, map20 = "0.0020", "0.0400", "0.0141", "0.0067"
+            p20, r20, ndcg20, map20 = "0.0030", "0.0600", "0.0196", "0.0086"
 
         colm1, colm2 = st.columns([1, 2])
         with colm1:
