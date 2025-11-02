@@ -517,8 +517,8 @@ with tab1:
     """, unsafe_allow_html=True)
 
     eda_videos = [
-        (ASSETS / "eda_top_popular_recipes.mp4", "**Top Popular Recipes Animation**: Trực quan hóa động các công thức phổ biến nhất theo số lượt đánh giá và rating trung bình. Biểu đồ racing bar chart cho thấy sự cạnh tranh và thay đổi thứ hạng của các món ăn được yêu thích nhất."),
-        (ASSETS / "eda_Time vs Rating Correlation.mp4", "**Time vs Rating Correlation**: Phân tích mối tương quan giữa thời gian nấu và điểm đánh giá theo thời gian. Animation thể hiện xu hướng thay đổi sở thích của người dùng qua các giai đoạn khác nhau."),
+        (ASSETS / "eda_top_popular_recipes.mp4", "**Top Popular Recipes Animation**: Trực quan hóa động các công thức phổ biến nhất theo số lượt đánh giá và rating trung bình."),
+        (ASSETS / "eda_Time vs Rating Correlation.mp4", "**Time vs Rating Correlation**: Phân tích mối tương quan giữa thời gian nấu và điểm đánh giá theo thời gian."),
     ]
 
     # Use same grid as images but center the 2 videos
@@ -664,3 +664,4 @@ st.markdown("""
     <p><em>Đề xuất cá nhân hóa từ 872K đánh giá – Hybrid SVD + CBF</em></p>
 </div>
 """, unsafe_allow_html=True)
+
