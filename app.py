@@ -104,7 +104,7 @@ st.markdown('<div class="app-overlay"></div>', unsafe_allow_html=True)
 def load_data():
     with open('recommendations_3models.pkl', 'rb') as f:
         recs = pickle.load(f)
-    with open('light_recipe_info.pkl', 'rb') as f:
+    with open('recipe_info.pkl', 'rb') as f:
         info = pickle.load(f)
     return recs, info
 
@@ -264,3 +264,4 @@ st.markdown("""
     <p><em>Đề xuất cá nhân hóa từ 872K đánh giá – Hybrid SVD + CBF + Tag Genome</em></p>
 </div>
 """, unsafe_allow_html=True)
+
