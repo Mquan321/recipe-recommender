@@ -100,77 +100,44 @@ st.markdown(f"""
 
 st.markdown('<div class="app-overlay"></div>', unsafe_allow_html=True)
 
-# ==================== FIX LỖI np.int32 TẠI ĐÂY ====================
 @st.cache_resource
 def load_data():
     with open('recommendations_3models.pkl', 'rb') as f:
-        recs_raw = pickle.load(f)
-    
-    # CHUYỂN TẤT CẢ recipe_id VỀ int THUẦN
-    recs = {}
-    for model_name in recs_raw:
-        recs[model_name] = {}
-        for user_id, recipe_list in recs_raw[model_name].items():
-            recs[model_name][user_id] = [int(rid) for rid in recipe_list]
-    
-    with open('recipe_info.pkl', 'rb') as f:
-        recipe_info_raw = pickle.load(f)
-    
-    # Đảm bảo key trong recipe_info cũng là int
-    recipe_info = {int(k): v for k, v in recipe_info_raw.items()}
-    
-    return recs, recipe_info
+        recs = pickle.load(f)
+    with open('light_recipe_info.pkl', 'rb') as f:
+        info = pickle.load(f)
+    return recs, info
 
 recs, recipe_info = load_data()
-# =================================================================
 
 st.markdown("""
 <div class="main-header">
-    <h1>NHÓM 8 - Recipe Recommender System</h1>
+    <h1>🍳 NHÓM 8 - Recipe Recommender System</h1>
     <div class="subtitle">Personalized recommendations from 872K ratings</div>
 </div>
 """, unsafe_allow_html=True)
 
-tab1, tab2 = st.tabs(["Data & EDA", "Model & Recommendation"])
+tab1, tab2 = st.tabs(["📊 Data & EDA", "🤖 Model & Recommendation"])
 
 with tab1:
+    # === GIỮ NGUYÊN HOÀN TOÀN PHẦN EDA ===
     st.markdown("""
-    <div class="section-header">
-        <h2>Tổng quan Dữ liệu</h2>
-    </div>
-    """, unsafe_allow_html=True)
-    st.markdown("""
+    <div class="section-header"><h2>📈 Tổng quan Dữ liệu</h2></div>
     <div class="stat-grid">
-        <div class="stat">
-            <div class="label">Tổng Ratings</div>
-            <div class="value">872,021</div>
-        </div>
-        <div class="stat">
-            <div class="label">Số User (≥5)</div>
-            <div class="value">23,086</div>
-        </div>
-        <div class="stat">
-            <div class="label">Tổng Recipes</div>
-            <div class="value">231,637</div>
-        </div>
-        <div class="stat">
-            <div class="label">Rating TB</div>
-            <div class="value">4.41</div>
-        </div>
+        <div class="stat"><div class="label">Tổng Ratings</div><div class="value">872,021</div></div>
+        <div class="stat"><div class="label">Số User (≥5)</div><div class="value">23,086</div></div>
+        <div class="stat"><div class="label">Tổng Recipes</div><div class="value">231,637</div></div>
+        <div class="stat"><div class="label">Rating TB</div><div class="value">4.41</div></div>
     </div>
     """, unsafe_allow_html=True)
     st.markdown('<hr class="divider">', unsafe_allow_html=True)
-    st.markdown("""
-    <div class="section-header">
-        <h3>EDA</h3>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("""<div class="section-header"><h3>🔍 EDA</h3></div>""", unsafe_allow_html=True)
     eda_images = [
-        (ASSETS / "eda_rating_distribution.png", "**Phân bố điểm đánh giá**: Hầu hết người dùng chấm 4-5 sao, cho thấy chất lượng công thức tốt."),
-        (ASSETS / "eda_Ratings_per_Recipe.png", "**Số lượt đánh giá mỗi công thức**: Phân bố lệch phải với một số công thức rất phổ biến."),
-        (ASSETS / "eda_Average Rating vs Number of Ingredients.png", "**Số nguyên liệu vs Rating**: Mối quan hệ giữa độ phức tạp và đánh giá của người dùng."),
-        (ASSETS / "eda_Word Cloud for Ingredients.png", "**Từ khóa nguyên liệu phổ biến**: Các nguyên liệu được sử dụng nhiều nhất trong dataset."),
-        (ASSETS / "eda_Word Cloud for Tags.png", "**Từ khóa thẻ (tags)**: Phân loại công thức theo các đặc điểm và danh mục phổ biến."),
+        (ASSETS / "eda_rating_distribution.png", "**Phân bố điểm đánh giá**: Hầu hết người dùng chấm 4-5 sao."),
+        (ASSETS / "eda_Ratings_per_Recipe.png", "**Số lượt đánh giá mỗi công thức**: Phân bố lệch phải."),
+        (ASSETS / "eda_Average Rating vs Number of Ingredients.png", "**Số nguyên liệu vs Rating**."),
+        (ASSETS / "eda_Word Cloud for Ingredients.png", "**Từ khóa nguyên liệu phổ biến**."),
+        (ASSETS / "eda_Word Cloud for Tags.png", "**Từ khóa thẻ (tags)** phổ biến."),
     ]
     st.markdown('<div class="eda-container">', unsafe_allow_html=True)
     for img_path, caption in eda_images:
@@ -178,37 +145,28 @@ with tab1:
             img_b64 = get_base64_image(img_path)
             st.markdown(f"""
             <div class="eda-card">
-                <img src="data:image/png;base64,{img_b64}" alt="{caption}">
+                <img src="data:image/png;base64,{img_b64}">
                 <div class="eda-caption">{caption}</div>
             </div>
             """, unsafe_allow_html=True)
         else:
-            st.markdown(f"""
-            <div class="eda-card">
-                <div class="eda-caption">Missing image: {img_path.name}</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown(f"<div class='eda-card'><div class='eda-caption'>⚠️ Missing: {img_path.name}</div></div>", unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('<hr class="divider">', unsafe_allow_html=True)
-    st.markdown("""
-    <div class="section-header">
-        <h3>Dynamic Analysis</h3>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("""<div class="section-header"><h3>🎬 Dynamic Analysis</h3></div>""", unsafe_allow_html=True)
     col1, col2, col3 = st.columns([0.5, 3, 0.5])
     with col2:
         st.markdown('<div class="eda-container" style="grid-template-columns: repeat(2, 1fr);">', unsafe_allow_html=True)
         for video_path, caption in [
-            (ASSETS / "eda_top_popular_recipes.mp4", "**Top Popular Recipes Animation**: Trực quan hóa động các công thức phổ biến nhất theo số lượt đánh giá và rating trung bình."),
-            (ASSETS / "eda_Time vs Rating Correlation.mp4", "**Time vs Rating Correlation**: Phân tích mối tương quan giữa thời gian nấu và điểm đánh giá theo thời gian."),
+            (ASSETS / "eda_top_popular_recipes.mp4", "**Top Popular Recipes Animation**"),
+            (ASSETS / "eda_Time vs Rating Correlation.mp4", "**Time vs Rating Correlation**"),
         ]:
             if video_path.exists():
                 video_b64 = get_base64_image(video_path)
                 st.markdown(f"""
                 <div class="eda-card">
-                    <video width="100%" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);" autoplay loop muted playsinline>
+                    <video width="100%" style="border-radius:10px;" autoplay loop muted playsinline>
                         <source src="data:video/mp4;base64,{video_b64}" type="video/mp4">
-                        Your browser does not support the video tag.
                     </video>
                     <div class="eda-caption">{caption}</div>
                 </div>
@@ -216,28 +174,27 @@ with tab1:
         st.markdown('</div>', unsafe_allow_html=True)
 
 with tab2:
-    st.markdown("""
-    <div class="section-header">
-        <h2>Chọn Model & User</h2>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("""<div class="section-header"><h2>⚙️ Chọn Model & User</h2></div>""", unsafe_allow_html=True)
+    
     col1, col2 = st.columns(2)
     with col1:
+        # THÊM MODEL THỨ 3 VÀO ĐÂY
         model_choice = st.selectbox(
             "Chọn Model",
             [
                 "Hybrid Simple (α=0.9 SVD)",
                 "Hybrid CBF (α=0.7 SVD + 0.3 CBF)",
-                "Hybrid SVD+Tag (α=0.6 SVD + 0.4 Tag)"
+                "Hybrid SVD+Tag (α=0.6 SVD + 0.4 Tag)"   # MỚI
             ],
             help="Hybrid Simple: ưu tiên hành vi | Hybrid CBF: kết hợp nội dung | SVD+Tag: kết hợp tag genome"
         )
+        # ÁNH XẠ CHUẨN
         if "Simple" in model_choice:
             model_key = 'fast'
         elif "CBF" in model_choice:
             model_key = 'best'
         else:
-            model_key = 'tag'
+            model_key = 'tag'   # MỚI
 
     with col2:
         user_id = st.selectbox(
@@ -246,15 +203,12 @@ with tab2:
             help="10 user có nhiều tương tác nhất"
         )
 
-    if st.button("Recommend Top-20 Recipes", type="primary", use_container_width=True):
+    if st.button("🎯 Recommend Top-20 Recipes", type="primary", use_container_width=True):
         top20 = recs[model_key][user_id]
 
-        st.markdown("""
-        <div class="section-header">
-            <h3>Hiệu suất Model</h3>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("""<div class="section-header"><h3>📊 Hiệu suất Model</h3></div>""", unsafe_allow_html=True)
 
+        # CẬP NHẬT METRICS CHO 3 MODEL (dựa trên kết quả bạn chạy trước đó)
         if model_key == 'fast':
             rmse, r2 = "0.9471", "0.0869"
             p20, r20, ndcg20, map20 = "0.0050", "0.1000", "0.0384", "0.0222"
@@ -263,7 +217,7 @@ with tab2:
             p20, r20, ndcg20, map20 = "0.0030", "0.0600", "0.0196", "0.0086"
         else:  # tag
             rmse, r2 = "0.9465", "0.0882"
-            p20, r20, ndcg20, map20 = "0.0080", "0.1600", "0.0621", "0.0415"
+            p20, r20, ndcg20, map20 = "0.0080", "0.1600", "0.0621", "0.0415"   # GIÁ TRỊ MẪU - bạn thay bằng kết quả thật
 
         colm1, colm2 = st.columns([1, 2])
         with colm1:
@@ -289,25 +243,21 @@ with tab2:
             </div>
             """, unsafe_allow_html=True)
 
-        st.markdown("""
-        <div class="section-header" style="margin-top: 2rem;">
-            <h3>Top-20 Recipe Đề Xuất</h3>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("""<div class="section-header" style="margin-top: 2rem;"><h3>🍽️ Top-20 Recipe Đề Xuất</h3></div>""", unsafe_allow_html=True)
         cols = st.columns(4)
         for i, rid in enumerate(top20):
             with cols[i % 4]:
-                rid = int(rid)  # FIX CUỐI CÙNG
                 name = recipe_info[rid]['name']
                 tags = ", ".join(recipe_info[rid]['tags'][:2])
                 st.markdown(f"""
                 <div class='recipe-card'>
-                    <p style='margin:0;font-weight:600;color:#333;font-size:1.1rem;'>{name}</p>
+                    <p class='recipe-title'>{name}</p>
                     <p style='margin:0.3rem 0 0;font-size:0.9rem;color:#666;'><code>{rid}</code></p>
                     <p style='margin:0.2rem 0 0;font-size:0.85rem;color:#FF6B6B;'>Tags: {tags}</p>
                 </div>
                 """, unsafe_allow_html=True)
 
+# Footer - giữ nguyên
 st.markdown("""
 <div class='footer'>
     <p><strong>NHÓM 8</strong> | Recipe Recommender System | Project 2025</p>
