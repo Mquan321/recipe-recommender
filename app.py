@@ -647,7 +647,7 @@ with tab2:
         cols = st.columns(4)
         for i, rid in enumerate(top20):
             with cols[i % 4]:
-                name = light_recipe_info[rid]['name']
+                name = recipe_info[rid]['name']
                 tags = ", ".join(recipe_info[rid]['tags'][:2])
                 st.markdown(f"""
                 <div class='recipe-card'>
@@ -664,6 +664,7 @@ st.markdown("""
     <p><em>Đề xuất cá nhân hóa từ 872K đánh giá – Hybrid SVD + CBF</em></p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
