@@ -607,7 +607,7 @@ with tab2:
             rmse, r2 = "0.9465", "0.0882"
             p20, r20, ndcg20, map20 = "0.0080", "0.1600", "0.0621", "0.0415"
 
-        colm1, colm2 = st.columns([1, 2])
+        colm1, colm2 = st.columns([1, 1])
         with colm1:
             st.markdown(f"""
             <div style='background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08)); 
@@ -631,7 +631,7 @@ with tab2:
             <div style='background: linear-gradient(135deg, rgba(255,107,107,0.08), rgba(255,142,83,0.08)); 
                         padding: 1.25rem; border-radius: 12px; border-left: 4px solid var(--accent-2);'>
                 <h4 style='margin: 0 0 1rem 0; color: var(--accent-contrast); font-size: 1.1rem; font-weight: 700;'>Ranking Metrics @ K=20</h4>
-                <div style='display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;'>
+                <div style='display: grid; gap: 0.75rem;'>
                     <div class='stat' style='margin:0;'><div class='label'>P@20</div><div class='value'>{p20}</div></div>
                     <div class='stat' style='margin:0;'><div class='label'>R@20</div><div class='value'>{r20}</div></div>
                     <div class='stat' style='margin:0;'><div class='label'>nDCG@20</div><div class='value'>{ndcg20}</div></div>
